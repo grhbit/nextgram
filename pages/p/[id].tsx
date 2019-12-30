@@ -4,7 +4,10 @@ import { useRouter } from 'next/router'
 
 export default function PhotoPage() {
   const router = useRouter();
-  const { id } = router.query;
+  let { id } = router.query;
+  if (Array.isArray(id)) {
+    id = id[0];
+  }
 
   return (
     <div className='permalink'>

@@ -6,7 +6,16 @@ import Modal from '../components/modal';
 
 const KEYCODE_ESC = 27;
 
-function IndexPage({ photos }) {
+interface Photo {
+  id: string;
+  thumbnail: string;
+};
+
+interface IndexProps {
+  photos: Photo[];
+}
+
+function IndexPage({ photos }: IndexProps) {
   const router = useRouter();
   const [photoId, setPhotoId] = React.useState();
 
@@ -96,15 +105,18 @@ IndexPage.getInitialProps = async () => {
 
 export default IndexPage;
 
-async function getGithubProfileIds() {
-  const res = await fetch('https://api.github.com/users')
-  const result = await res.json()
-  return result.map((info) => info.id)
+interface GfycatItem {
+  gfyName: string;
+  thumb100PosterUrl: string;
+}
+
+interface GfycatResponse {
+  gfycats: GfycatItem[];
 }
 
 async function getGifNames() {
-  const res = await fetch('https://api.gfycat.com/v1/gfycats/trending?count=20')
-  const result = await res.json()
+  const res = await fetch('https://api.gfycat.com/v1/gfycats/trending?count=20');
+  const result: GfycatResponse = await res.json();
 
-  return result.gfycats.map((info) => ({ id: info.gfyName, thumbnail: info.thumb100PosterUrl }));
+  return result.gfycats.map<Photo>(({ gfyName, thumb100PosterUrl }) => ({ id: gfyName, thumbnail: thumb100PosterUrl }));
 }

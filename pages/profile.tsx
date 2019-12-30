@@ -3,7 +3,11 @@ import { useRouter } from 'next/router'
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { id } = router.query;
+  let { id } = router.query;
+
+  if (Array.isArray(id)) {
+    id = id[0];
+  }
 
   return (
     <div className='main'>
