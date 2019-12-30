@@ -1,12 +1,17 @@
-import React from 'react'
+import React, { MouseEventHandler } from 'react'
 import Photo from './frame'
 
-export default function Modal({ id, onDismiss }) {
-  const shim = React.useRef(null);
-  const photoWrap = React.useRef(null);
+export interface ModalProps {
+  id: string;
+  onDismiss: () => void;
+}
 
-  const onClick = React.useCallback((e) => {
-    if (shim.current === e.target || photoWrap.current === e.target) {
+export default function Modal({ id, onDismiss }: ModalProps) {
+  const shim = React.useRef<HTMLDivElement>(null);
+  const photoWrap = React.useRef<HTMLDivElement>(null);
+
+  const onClick = React.useCallback<MouseEventHandler<HTMLDivElement>>(({ target }) => {
+    if (shim.current === target || photoWrap.current === target) {
      if (onDismiss) {
        onDismiss();
      }
