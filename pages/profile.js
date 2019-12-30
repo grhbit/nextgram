@@ -1,24 +1,29 @@
 import React from 'react'
+import { useRouter } from 'next/router'
 
-export default ({ url: { query: { id } } }) => (
-  <div className='main'>
-    <h1 className='heading'>
-      User profile:
-      {' '}
-      <b className='username'>{id}</b>
-    </h1>
-    <style jsx>{`
-      .main {
-        padding: 100px;
-      }
+export default function ProfilePage() {
+  const router = useRouter();
+  const { id } = router.query;
 
-      .heading {
-        font: 15px Monaco;
-      }
+  return (
+    <div className='main'>
+      <h1 className='heading'>
+        User profile:{' '}
+        <b className='username'>{id}</b>
+      </h1>
+      <style jsx>{`
+        .main {
+          padding: 100px;
+        }
 
-      .username {
-        color: blue;
-      }
-    `}</style>
-  </div>
-)
+        .heading {
+          font: 15px Monaco;
+        }
+
+        .username {
+          color: blue;
+        }
+      `}</style>
+    </div>
+  );
+}
