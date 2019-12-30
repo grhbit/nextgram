@@ -1,106 +1,100 @@
-import React from 'react'
-import Router from 'next/router'
-import Modal from '../components/modal'
-import 'isomorphic-fetch'
+import 'isomorphic-fetch';
+import Link from "next/link";
+import Router, { useRouter } from 'next/router';
+import React from 'react';
+import Modal from '../components/modal';
 
-export default class extends React.Component {
-  static async getInitialProps () {
-    return {
-      photos: await getGifNames(),
+const KEYCODE_ESC = 27;
+
+function IndexPage({ photos }) {
+  const router = useRouter();
+  const [photoId, setPhotoId] = React.useState();
+
+  React.useEffect(() => {
+    const { id } = router.query;
+    setPhotoId(id);
+  }, [router]);
+
+  const onModalDismiss = React.useCallback(() => {
+    Router.push('/', '/', { shallow: true });
+  }, [router]);
+
+  const onKeyDown = React.useCallback((e) => {
+    if (photoId && e.keyCode === KEYCODE_ESC) {
+      router.back();
     }
-  }
+  }, [photoId, router]);
 
-  constructor (props) {
-    super(props)
-    this.onKeyDown = this.onKeyDown.bind(this)
-  }
+  React.useEffect(() => {
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [onKeyDown]);
 
-  // handling escape close
-  componentDidMount () {
-    document.addEventListener('keydown', this.onKeyDown)
-  }
+  const modal = photoId ? <Modal id={photoId} onDismiss={onModalDismiss} /> : null;
 
-  componentWillUnmount () {
-    document.removeEventListener('keydown', this.onKeyDown)
-  }
-
-  onKeyDown (e) {
-    if (!this.props.url.query.photoId) return
-    if (e.keyCode === 27) {
-      this.props.url.back()
-    }
-  }
-
-  dismissModal () {
-    Router.push('/', '/', { shallow: true })
-  }
-
-  showPhoto (e, id) {
-    e.preventDefault()
-    Router.push(`/?photoId=${id}`, `/p/${id}`, { shallow: true })
-  }
-
-  render () {
-    const { url, photos } = this.props
-
-    return (
-      <div className='list'>
-        {
-          url.query.photoId &&
-            <Modal
-              id={url.query.photoId}
-              onDismiss={() => this.dismissModal()}
-            />
-        }
-        {
-          photos.map((id) => (
-            <div key={id} className='photo'>
-              <a
-                className='photoLink'
-                href={`/photo?id=${id}`}
-                onClick={(e) => this.showPhoto(e, id)}
-              >
-                <img src={`https://thumbs.gfycat.com/${id}-thumb360.jpg`} />
+  return (
+    <div className='list'>
+      {modal}
+      {
+        photos.map(({ id, thumbnail }) => (
+          <div key={id} className='photo'>
+            <Link href={{
+              pathname: "/",
+              query: {
+                id,
+              },
+            }} as={`/p/${id}`} passHref shallow>
+              <a className='photoLink'>
+                <img src={thumbnail} />
               </a>
-            </div>
-          ))
+            </Link>
+          </div>
+        ))
+      }
+      <style jsx>{`
+        .list {
+          padding: 50px;
+          text-align: center;
         }
-        <style jsx>{`
-          .list {
-            padding: 50px;
-            text-align: center;
-          }
 
-          .photo {
-            display: inline-block;
-          }
+        .photo {
+          display: inline-block;
+        }
 
-          .photoLink {
-            color: #333;
-            verticalAlign: middle;
-            cursor: pointer;
-            background: #eee;
-            display: inline-block;
-            width: 250px;
-            height: 120px;
-            line-height: 120px;
-            margin: 10px;
-            border: 2px solid transparent;
-          }
+        .photoLink {
+          color: #333;
+          verticalAlign: middle;
+          cursor: pointer;
+          background: #eee;
+          display: inline-block;
+          width: 250px;
+          height: 120px;
+          line-height: 120px;
+          margin: 10px;
+          border: 2px solid transparent;
+        }
 
-          .photoLink img {
-            width: 250px;
-          }
+        .photoLink img {
+          width: 250px;
+        }
 
-          .photoLink:hover {
-            borderColor: blue;
-          }
-        `}</style>
-      </div>
-    )
-  }
+        .photoLink:hover {
+          borderColor: blue;
+        }
+      `}</style>
+    </div>
+  );
 }
 
+IndexPage.getInitialProps = async () => {
+  return {
+    photos: await getGifNames(),
+  };
+};
+
+export default IndexPage;
 
 async function getGithubProfileIds() {
   const res = await fetch('https://api.github.com/users')
@@ -112,5 +106,5 @@ async function getGifNames() {
   const res = await fetch('https://api.gfycat.com/v1/gfycats/trending?count=20')
   const result = await res.json()
 
-  return result.gfycats.map((info) => info.gfyName)
+  return result.gfycats.map((info) => ({ id: info.gfyName, thumbnail: info.thumb100PosterUrl }));
 }

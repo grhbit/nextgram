@@ -1,26 +1,16 @@
 import React from 'react'
-import Link from 'next/link'
 
-class RandomDescription extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {}
-  }
-
-  componentDidMount() {
+function RandomDescription() {
+  const [text, setText] = React.useState();
+  React.useEffect(() => {
     fetch('https://api.icndb.com/jokes/random')
       .then((res) => res.json())
       .then((result) => {
-        this.setState({
-          text: result.value.joke
-        })
-      })
-  }
+        setText(result.value.joke);
+      });
+  }, []);
 
-  render () {
-    const { text } = this.state
-    return <p>{ text || 'loading...'}</p>
-  }
+  return <p>{ text || 'loading...'}</p>
 }
 
 export default ({ id }) => (
